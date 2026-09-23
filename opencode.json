@@ -1,0 +1,45 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "mysql": {
+      "type": "local",
+      "command": [
+        "cmd.exe",
+        "/c",
+        "npx",
+        "-y",
+        "mysql-mcp-server"
+      ],
+      "environment": {
+        "MYSQL_HOST": "127.0.0.1",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "root",
+        "MYSQL_PASSWORD": "",
+        "MYSQL_DATABASE": "mcp_demo_db"
+      },
+      "enabled": true
+    }
+  },
+  "agent": {
+    "database-assistant": {
+      "description": "Asisten database yang membaca data nyata melalui MCP MySQL",
+      "mode": "primary",
+      "model": "opencode/big-pickle",
+      "prompt": "Kamu adalah assistant database yang terhubung melalui MCP MySQL ke database mcp_demo_db. Gunakan hanya tabel students untuk menjawab pertanyaan database. Kolom yang tersedia adalah id, nim, name, major, semester, dan gpa. Jika pengguna meminta data database, gunakan tool MCP terlebih dahulu. Jangan mengarang data; jawaban harus berdasarkan data yang benar-benar diperoleh dari database.",
+      "permission": {
+        "*": "allow"
+      }
+    },
+    "t-nose": {
+      "description": "Agent untuk mencari informasi tentang T-NOSE",
+      "mode": "primary",
+      "model": "opencode/big-pickle",
+      "temperature": 0.1,
+      "prompt": "Kamu adalah agent untuk mencari informasi tentang T-NOSE. Pelajari informasi T-NOSE dari website resmi https://tuvv.telkomuniversity.ac.id/t-nose/. Gunakan sumber tersebut ketika menjawab pertanyaan tentang T-NOSE. Jika informasi tidak tersedia atau website tidak dapat diakses, katakan dengan jujur dan jangan mengarang jawaban.",
+      "permission": {
+        "*": "allow",
+        "bash": "deny"
+      }
+    }
+  }
+}
