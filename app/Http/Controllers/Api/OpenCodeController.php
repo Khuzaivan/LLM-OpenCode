@@ -541,9 +541,20 @@ class OpenCodeController extends Controller
                 }
             }
 
-            // Inject the live students data by default so OpenCode can answer
-            // database questions from actual MySQL records, not only schema.
-            if ($request->boolean('include_db_context', true)) {
+            // "Hubungkan Konteks Database (MCP)" toggle: when checked, connect the
+            // MySQL MCP server and inject the live students context so OpenCode can
+            // answer database questions from real records. When unchecked, disconnect
+            // the MCP server and skip injection so the model genuinely cannot reach
+            // the database. Defaults to off when the flag is absent.
+            $useDbContext = $request->boolean('include_db_context');
+
+            try {
+                $this->client->{$useDbContext ? 'connectMcpServer' : 'disconnectMcpServer'}('mysql');
+            } catch (\Exception $e) {
+                \Log::warning('MCP server gate failed: ' . $e->getMessage());
+            }
+
+            if ($useDbContext) {
                 try {
                     $mcpContext = $this->mcpBridge->getContext($messageText);
                     $messageText = $mcpContext . "\n\nUser Question: " . $messageText;

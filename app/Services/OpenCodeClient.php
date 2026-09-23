@@ -68,6 +68,33 @@ class OpenCodeClient
         return $client->send(strtoupper($method), $url, $options);
     }
 
+    /**
+     * Make a request to a root-level (v1) OpenCode endpoint that is NOT
+     * prefixed with /api (e.g. MCP control endpoints).
+     */
+    private function mcpRequest(string $method, string $path, array $data = []): Response
+    {
+        $url = "{$this->baseUrl}{$path}";
+
+        $client = Http::timeout($this->timeout)
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ]);
+
+        if ($this->apiKey) {
+            $client = $client->withHeaders([
+                'Authorization' => "Bearer {$this->apiKey}",
+            ]);
+        }
+
+        $payload = in_array(strtoupper($method), ['POST', 'PUT', 'PATCH'], true) && $data === []
+            ? new \stdClass()
+            : $data;
+
+        return $client->{strtolower($method)}($url, $payload);
+    }
+
     // ==================== Health & Server ====================
 
     /**
@@ -544,7 +571,7 @@ class OpenCodeClient
      */
     public function listMcpServers(): Response
     {
-        return $this->request('GET', '/mcp');
+        return $this->mcpRequest('GET', '/mcp');
     }
 
     /**
@@ -552,7 +579,7 @@ class OpenCodeClient
      */
     public function addMcpServer(string $server, array $config): Response
     {
-        return $this->request('PUT', "/mcp/{$server}", $config);
+        return $this->mcpRequest('PUT', "/mcp/{$server}", $config);
     }
 
     /**
@@ -560,7 +587,7 @@ class OpenCodeClient
      */
     public function removeMcpServer(string $server): Response
     {
-        return $this->request('DELETE', "/mcp/{$server}");
+        return $this->mcpRequest('DELETE', "/mcp/{$server}");
     }
 
     /**
@@ -568,7 +595,7 @@ class OpenCodeClient
      */
     public function connectMcpServer(string $server): Response
     {
-        return $this->request('POST', "/mcp/{$server}/connect");
+        return $this->mcpRequest('POST', "/mcp/{$server}/connect");
     }
 
     /**
@@ -576,7 +603,7 @@ class OpenCodeClient
      */
     public function disconnectMcpServer(string $server): Response
     {
-        return $this->request('POST', "/mcp/{$server}/disconnect");
+        return $this->mcpRequest('POST', "/mcp/{$server}/disconnect");
     }
 
     /**
@@ -584,7 +611,7 @@ class OpenCodeClient
      */
     public function listMcpResources(): Response
     {
-        return $this->request('GET', '/mcp/resource');
+        return $this->mcpRequest('GET', '/experimental/resource');
     }
 
     // ==================== Helper Methods ====================

@@ -806,10 +806,7 @@
             }
           );
           if (this.agents.length > 0) {
-            // Prefer the project assistant when it exists. OpenCode lists the
-            // generic `build` agent first, which may start scanning a whole
-            // workspace for a simple chat question.
-            this.currentAgentId = this.agents.find(agent => agent.id === 't-nose')?.id
+            this.currentAgentId = this.agents.find(agent => agent.id === 'build')?.id
               ?? this.agents[0].id;
           }
         } catch (e) {
@@ -911,7 +908,7 @@
           const r = await this.api.sendMessage(id, text, {
             agent: this.currentAgentId || undefined,
             provider: this.currentProviderId || undefined,
-            include_db_context: this.includeDbContext || undefined,
+            include_db_context: this.includeDbContext,
           });
           const content = typeof r === 'string' ? r : r?.content;
           
